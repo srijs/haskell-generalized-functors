@@ -3,6 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Data.Functors where
@@ -22,6 +23,15 @@ import Control.Applicative (Const(..))
 
 class Functor f v | f -> v where
   mapf :: Morphism v a b -> f a -> f b
+
+fmap :: Functor f Covariant => (a -> b) -> f a -> f b
+fmap = mapf
+
+contramap :: Functor f Contravariant => (b -> a) -> f a -> f b
+contramap = mapf
+
+invmap :: Functor f Invariant => (a -> b) -> (b -> a) -> f a -> f b
+invmap f f' = mapf (f, f')
 
 instance Functor ((->) r) Covariant where mapf = Prelude.fmap
 
@@ -44,21 +54,42 @@ instance (Functor f v, Functor g v) => Functor (Product f g) v where
 
 -- ** Bifunctor
 
-class Functor (f v) w => Bifunctor f v w | f -> v, f -> w where
-  mapg :: Morphism v a c -> f a b -> f c b
+class Bifunctor f v w | f -> v, f -> w where
+  mapbi :: Morphism v a c -> Morphism w b d -> f a b -> f c d
+
+bimap :: Bifunctor f Covariant Covariant => (a -> b) -> (c -> d) -> f a c -> f b d
+bimap = mapbi
+
+first :: Bifunctor f Covariant Covariant => (a -> b) -> f a c -> f b c
+first f = mapbi f id
+
+second :: Bifunctor f Covariant Covariant => (c -> d) -> f a c -> f a d
+second = mapbi id
+
+dimap :: Bifunctor f Contravariant Covariant => (b -> a) -> (c -> d) -> f a c -> f b d
+dimap = mapbi
+
+lmap :: Bifunctor f Contravariant Covariant => (b -> a) -> f a c -> f b c
+lmap f = mapbi f id
+
+rmap :: Bifunctor f Contravariant Covariant => (c -> d) -> f a c -> f a d
+rmap = mapbi id
+
+invmap2 :: Bifunctor f Invariant Invariant => (a -> c) -> (c -> a) -> (b -> d) -> (d -> b) -> f a b -> f c d
+invmap2 f f' g g' = mapbi (f, f') (g, g')
 
 instance Bifunctor (->) Contravariant Covariant where
-  mapg f h = h . f
+  mapbi f g h = g . h . f
 
 instance Bifunctor (,) Covariant Covariant where
-  mapg f (a, b) = (f a, b)
+  mapbi f g (a, b) = (f a, g b)
 
 instance Bifunctor Either Covariant Covariant where
-  mapg f (Left a) = Left (f a)
-  mapg _ (Right b) = Right b
+  mapbi f _ (Left a) = Left (f a)
+  mapbi _ g (Right b) = Right (g b)
 
 instance Bifunctor Const Covariant Bivariant where
-  mapg f (Const a) = Const (f a)
+  mapbi f _ (Const a) = Const (f a)
 
 -- * Morphisms
 

@@ -33,7 +33,7 @@ instance Invariant.Invariant2 f => Functor (WrappedInvariant2 f a) Invariant whe
   mapf (f, f') (WrappedInvariant2 a) = WrappedInvariant2 (Invariant.invmap2 id id f f' a)
 
 instance Invariant.Invariant2 f => Bifunctor (WrappedInvariant2 f) Invariant Invariant where
-  mapg (f, f') (WrappedInvariant2 a) = WrappedInvariant2 (Invariant.invmap2 f f' id id a)
+  mapbi (f, f') (g, g') (WrappedInvariant2 a) = WrappedInvariant2 (Invariant.invmap2 f f' g g' a)
 
 newtype WrappedBifunctor f a b = WrappedBifunctor { unwrapBifunctor :: f a b }
 
@@ -41,7 +41,7 @@ instance Bifunctor.Bifunctor f => Functor (WrappedBifunctor f a) Covariant where
   mapf f (WrappedBifunctor a) = WrappedBifunctor (Bifunctor.second f a)
 
 instance Bifunctor.Bifunctor f => Bifunctor (WrappedBifunctor f) Covariant Covariant where
-  mapg f (WrappedBifunctor a) = WrappedBifunctor (Bifunctor.first f a)
+  mapbi f g (WrappedBifunctor a) = WrappedBifunctor (Bifunctor.bimap f g a)
 
 newtype WrappedProfunctor f a b = WrappedProfunctor { unwrapProfunctor :: f a b }
 
@@ -49,4 +49,4 @@ instance Profunctor.Profunctor f => Functor (WrappedProfunctor f a) Covariant wh
   mapf f (WrappedProfunctor a) = WrappedProfunctor (Profunctor.rmap f a)
 
 instance Profunctor.Profunctor f => Bifunctor (WrappedProfunctor f) Contravariant Covariant where
-  mapg f (WrappedProfunctor a) = WrappedProfunctor (Profunctor.lmap f a)
+  mapbi f g (WrappedProfunctor a) = WrappedProfunctor (Profunctor.dimap f g a)
