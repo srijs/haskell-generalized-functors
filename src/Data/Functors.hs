@@ -9,7 +9,6 @@
 module Data.Functors where
 
 import Prelude hiding (Functor, fmap)
-import qualified Prelude
 
 import Data.Functor.Sum (Sum(..))
 import Data.Functor.Product (Product(..))
@@ -33,17 +32,24 @@ contramap = mapf
 invmap :: Functor f Invariant => (a -> b) -> (b -> a) -> f a -> f b
 invmap f f' = mapf (f, f')
 
-instance Functor ((->) r) Covariant where mapf = Prelude.fmap
+instance Functor ((->) r) Covariant where
+  mapf f g = f . g
 
-instance Functor ((,) a) Covariant where mapf = Prelude.fmap
+instance Functor ((,) a) Covariant where
+  mapf f (a, b) = (a, f b)
 
-instance Functor [] Covariant where mapf = Prelude.fmap
+instance Functor [] Covariant where
+  mapf = map
 
-instance Functor (Either a) Covariant where mapf = Prelude.fmap
+instance Functor (Either a) Covariant where
+  mapf _ (Left a) = Left a
+  mapf f (Right b) = Right (f b)
 
-instance Functor (Const a) Bivariant where mapf _ (Const a) = Const a
+instance Functor (Const a) Bivariant where
+  mapf _ (Const a) = Const a
 
-instance Functor Proxy Bivariant where mapf _ _ = Proxy
+instance Functor Proxy Bivariant where
+  mapf _ _ = Proxy
 
 instance (Functor f v, Functor g v) => Functor (Sum f g) v where
   mapf f (InL a) = InL (mapf f a)
@@ -91,15 +97,23 @@ instance Bifunctor Either Covariant Covariant where
 instance Bifunctor Const Covariant Bivariant where
   mapbi f _ (Const a) = Const (f a)
 
--- * Morphisms
+-- ** Trifunctors
 
-data Covariant
-data Contravariant
-data Invariant
-data Bivariant
+class Trifunctor f v w x | f -> v, f -> w, f -> x where
+  maptri :: Morphism v a a' -> Morphism w b b' -> Morphism x c c' -> f a b c -> f a' b' c'
+
+instance Trifunctor (,,) Covariant Covariant Covariant where
+  maptri f g h (a, b, c) = (f a, g b, h c)
+
+-- * Morphisms
 
 type family Morphism v a b
 type instance Morphism Covariant a b = a -> b
 type instance Morphism Contravariant a b = b -> a
 type instance Morphism Invariant a b = (a -> b, b -> a)
 type instance Morphism Bivariant a b = Proxy b
+
+data Covariant
+data Contravariant
+data Invariant
+data Bivariant
