@@ -1,4 +1,5 @@
 {-# LANGUAGE Safe #-}
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FunctionalDependencies #-}
@@ -15,6 +16,16 @@ import Data.Functor.Product (Product(..))
 import Data.Proxy
 
 import Control.Applicative (Const(..))
+
+-- * Morphisms
+
+data Variance = Covariant | Contravariant | Invariant | Bivariant
+
+type family Morphism (v :: Variance) a b
+type instance Morphism Covariant a b = a -> b
+type instance Morphism Contravariant a b = b -> a
+type instance Morphism Invariant a b = (a -> b, b -> a)
+type instance Morphism Bivariant a b = Proxy b
 
 -- * Functors
 
@@ -104,16 +115,3 @@ class Trifunctor f v w x | f -> v, f -> w, f -> x where
 
 instance Trifunctor (,,) Covariant Covariant Covariant where
   maptri f g h (a, b, c) = (f a, g b, h c)
-
--- * Morphisms
-
-type family Morphism v a b
-type instance Morphism Covariant a b = a -> b
-type instance Morphism Contravariant a b = b -> a
-type instance Morphism Invariant a b = (a -> b, b -> a)
-type instance Morphism Bivariant a b = Proxy b
-
-data Covariant
-data Contravariant
-data Invariant
-data Bivariant
