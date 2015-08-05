@@ -11,7 +11,7 @@ import qualified Data.Functor.Invariant as Invariant
 import qualified Data.Bifunctor as Bifunctor
 import qualified Data.Profunctor as Profunctor
 
-import Data.Functors
+import Data.Functors.Types
 
 newtype WrappedFunctor f a = WrappedFunctor { unwrapFunctor :: f a }
 

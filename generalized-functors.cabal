@@ -16,7 +16,7 @@ cabal-version:       >=1.10
 library
   exposed-modules:     Data.Functors
                        Data.Functors.Wrapped
-  -- other-modules:
+  other-modules:       Data.Functors.Types
   -- other-extensions:
   build-depends:       base >=4.6 && <5,
                        transformers >=0.4,
