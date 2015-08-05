@@ -29,20 +29,23 @@ import Control.Applicative (Const(..))
 
 data V = Covariant | Contravariant | Invariant | Bivariant
 
-class Variance (v :: V) where
-  type Morphism v a b
+type family Morphism v a b where
+  Morphism Covariant a b = a -> b
+  Morphism Contravariant a b = b -> a
+  Morphism Invariant a b = (a -> b, b -> a)
+  Morphism Bivariant a b = Proxy b
 
-instance Variance Covariant where
-  type Morphism Covariant a b = a -> b
+covariantId :: Morphism Covariant a a
+covariantId = id
 
-instance Variance Contravariant where
-  type Morphism Contravariant a b = b -> a
+contravariantId :: Morphism Contravariant a a
+contravariantId = id
 
-instance Variance Invariant where
-  type Morphism Invariant a b = (a -> b, b -> a)
+invariantId :: Morphism Invariant a a
+invariantId = (id, id)
 
-instance Variance Bivariant where
-  type Morphism Bivariant a b = Proxy b
+bivariantId :: Morphism Bivariant a a
+bivariantId = Proxy
 
 -- * Functors
 
@@ -53,8 +56,8 @@ class Functor f v | f -> v where
 
 -- ** Bifunctor
 
-class Bifunctor f v w | f -> v, f -> w where
-  mapbi :: Morphism v a c -> Morphism w b d -> f a b -> f c d
+class Bifunctor p v w | p -> v, p -> w where
+  mapbi :: Morphism v a c -> Morphism w b d -> p a b -> p c d
 
 -- ** Trifunctors
 

@@ -9,7 +9,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 
 module Data.Functors
-  ( V(..), Variance(..)
+  ( V(..), Morphism
   , Functor(..), Bifunctor(..), Trifunctor(..)
   , fmap, contramap, invmap
   , bimap, first, second, dimap, lmap, rmap, invmap2
